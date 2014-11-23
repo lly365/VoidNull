@@ -21,6 +21,7 @@ class VoidNull {
 
     private static $config;
     private static $request;
+    private static $app;
 
     static function config() {
         return self::$config;
@@ -50,13 +51,14 @@ class VoidNull {
         self::$config = new System\Config($configFile);
         //self::$config->loadConfig($c);
     }
-    private static function filters(){
+
+    private static function filters() {
         $filters = self::config()->getConfig('filter');
-        if($filters && is_array($filters)){
-            foreach($filters as $filterClass){
+        if ($filters && is_array($filters)) {
+            foreach ($filters as $filterClass) {
                 $filterObj = new $filterClass();
-                if($filterObj && $filterObj instanceof Core\IFilter){
-                    call_user_func_array(array($filterObj,'filter'), array(self::$request));
+                if ($filterObj && $filterObj instanceof Core\IFilter) {
+                    call_user_func_array(array($filterObj, 'filter'), array(self::$request));
                 } else {
                     unset($filterObj);
                     continue;
@@ -65,11 +67,20 @@ class VoidNull {
         }
     }
 
+    private static function app() {
+        if (!(self::$app && self::$app instanceof System\Application)) {
+            self::$app = new System\Application(self::$request);
+        }
+        return self::$app;
+    }
+
     static function startup() {
-        self::$request = new System\Request();
+        if (!(self::$request && self::$request instanceof System\Request)) {
+            self::$request = new System\Request();
+        }
         self::init();
-        
-        self::$request ->route(self::config()->getConfig('route'));
+        self::app()->run();
+        self::$request->route(self::config()->getConfig('route'));
     }
 
     static function log($msg) {

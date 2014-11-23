@@ -18,6 +18,24 @@ class Request {
     const ROUTE_TYPE_PATHINFO = 1;
     const ROUTE_TYPE_SEGMENT = 2;
     const ROUTE_TYPE_MIXED = 3;
+    
+    private $module = 'www';
+    private $controller = 'index';
+    private $action = 'index';
+    private $method = 'GET';
+    
+    function getModuleName(){
+        return $this->module;
+    }
+    function getControllerName(){
+        return $this->controller;
+    }
+    function getActionName(){
+        return $this->action;
+    }
+    function getMethod(){
+        return $this->method;
+    }
 
     /**
      * 获取当前URI。如：/index.php/a/b/c/d?id=999&ddd=555
@@ -71,6 +89,7 @@ class Request {
     }
 
     public function route($type) {
+        $this->method = self::getRequestMethod();
         switch ($type) {
             case self::ROUTE_TYPE_PATHINFO:
                 $this->routePathInfo();
@@ -110,6 +129,10 @@ class Request {
         $pathInfo['m'] = $modulePathInfo;
         $pathInfo['c'] = $controllerPathInfo;
         $pathInfo['a'] = $actionPathInfo;
+        
+        $this->module = $modulePathInfo;
+        $this->controller = $controllerPathInfo;
+        $this->action = $actionPathInfo;
 
         $_GET = $pathInfo;
         $url[] = $pathInfo['m'];
